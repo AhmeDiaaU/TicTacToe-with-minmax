@@ -1,4 +1,5 @@
 from gui import board , board_cols,board_rows
+import math
 def mark_square(row , col , player):
     """
     put a player in a square
@@ -53,7 +54,7 @@ def check_win(player , check_board = board):
     return False
 
 
-def minmax(minmax_board , depth , is_maximizing):
+def minmax(minmax_board , depth , is_maximizing , alpha , beta):
     """
     if this is False so we are in ai mode which try to get best case and best score 
     , we check all the squaress if one is 0 so we insert a value of player (2) and we make score = recuse the function untill we get the last value 
@@ -76,24 +77,30 @@ def minmax(minmax_board , depth , is_maximizing):
     elif if_board_isfull(minmax_board):
         return 0
     if is_maximizing : 
-        best_score = -1000
+        best_score = float('-inf')
         for row in range(board_rows):
             for col in range(board_cols):
                 if minmax_board[row][col] == 0:
                     minmax_board[row][col] = 2
-                    score = minmax(minmax_board , depth +1 , False) # false because player will do the worst thing to the ai 
+                    score = minmax(minmax_board , depth +1 , False , alpha , beta) # false because player will do the worst thing to the ai 
                     minmax_board[row][col] = 0 
-                    best_score = min(score , best_score)
+                    best_score = max(score , best_score)
+                    alpha = max(alpha , score)
+                    if beta <= alpha :
+                        break
         return best_score
     else :
-        best_score = 1000
+        best_score = float('inf')
         for row in range(board_rows):
             for col in range(board_cols):
                 if minmax_board[row][col] == 0:
                     minmax_board[row][col] = 1
-                    score = minmax(minmax_board , depth +1 , True) # false because player will do the worst thing to the ai 
+                    score = minmax(minmax_board , depth +1 , True ,alpha , beta ) # false because player will do the worst thing to the ai 
                     minmax_board[row][col] = 0 
-                    best_score = max(score , best_score)
+                    best_score = min(score , best_score)
+                    beta = min(beta , score)
+                    if beta <= alpha :
+                        break
         return best_score
     
 
@@ -112,7 +119,7 @@ def bestmove():
          for col in range(board_cols):
              if board[row][col] == 0:
                  board[row][col] = 2
-                 score = minmax(board , 0, False)
+                 score = minmax(board , 0, False , float('-inf'), float('inf') )
                  board[row][col] = 0 
                  if score > best_score:
                      best_score = score 
